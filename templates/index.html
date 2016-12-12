@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+
+<div class="page-header">
+    <h1>Welcome to {{ system_name }}: 
+        {% if not session.get('name') %} please login or sign up.
+        {% else %}{{ session.get('name')}}
+        {% endif %}
+    </h1>
+</div>
+
+{% endblock %}
+
