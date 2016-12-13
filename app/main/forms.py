@@ -12,10 +12,10 @@ class JoinForm(FlaskForm):
     # mandatory
     name = StringField("Name", validators=[Length(1,6,"Length should be <= 6")])
     passwd = PasswordField("Passowrd", validators=[Required()])
+    email = StringField("E-mail", validators=[Required(), Email("Invalid E-mail address")])
 
     # optional
     phone = StringField("Phone Number", validators = [Optional(), Length(11, 11, "Invalid phone number")])
-    mail = StringField("E-mail", validators=[Optional(), Email("Invalid E-mail address")])
     gender = SelectField("Gender", choices=[('M', 'Male'), ('F', 'Female')])
     ##birthday = #TODO
     company = StringField("Company")
@@ -32,9 +32,10 @@ class ProfileForm(FlaskForm):
     # mandatory
     name = StringField("Name", validators=[Length(1,6,"Length should be <= 6")])
     passwd = PasswordField("Passowrd", validators=[Required()])
+    email = StringField("E-mail", validators=[Required(), Email("Invalid E-mail address")])
+
     # optional
     phone = StringField("Phone Number", validators = [Optional(), Length(11, 11, "Invalid phone number")])
-    mail = StringField("E-mail", validators=[Optional(), Email("Invalid E-mail address")])
     gender = SelectField("Gender", choices=[('M', 'Male'), ('F', 'Female')])
     ##birthday = #TODO
     company = StringField("Company")

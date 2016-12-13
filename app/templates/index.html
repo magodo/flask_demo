@@ -5,8 +5,8 @@
 
 <div class="page-header">
     <h1>Welcome to {{ system_name }}: 
-        {% if not session.get('name') %} please login or sign up.
-        {% else %}{{ session.get('name')}}
+        {% if not current_user.is_authenticated %}Please login or sign up.
+        {% else %}Welcome!
         {% endif %}
     </h1>
 </div>

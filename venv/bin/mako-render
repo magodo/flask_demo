@@ -1,4 +1,4 @@
-#!/home/magodo/github/code/LoginSystem/02_Demo/venv/bin/python3
+#!/home/magodo/github/code/LoginSystem/02_Demo/venv/bin/python2.7
 
 # -*- coding: utf-8 -*-
 import re

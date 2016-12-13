@@ -1,14 +1,16 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from . import login_manager
 
 from . import db
 
-class InfoModel(db.Model):
+class InfoModel(UserMixin, db.Model):
 
     __tablename__ = 'infos'
 
     id = db.Column(db.Integer, primary_key=True)
     phone = db.Column(db.String, unique=False, index=False, nullable=True, default=None)
-    mail = db.Column(db.String, unique=False, index=False, nullable=True, default=None)
+    email = db.Column(db.String, unique=False, index=False, nullable=True, default=None)
 
     # set via "password" property
     password_hash = db.Column(db.String, unique=False, index=False, nullable=False, default="")
@@ -39,4 +41,8 @@ class InfoModel(db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return InfoModel.query.get(int(user_id))
 

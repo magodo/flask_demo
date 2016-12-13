@@ -69,7 +69,7 @@ class TestConfig(BaseConfig):
 
     # database
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-            'sqlite:///' + os.path.join(basedir, 'data-text.sqlite')
+            'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
 
     # test
     TESTING = True

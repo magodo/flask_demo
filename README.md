@@ -1,13 +1,9 @@
-Dependency
+VirtualEnv
 =========
 
-1. `flask-script`
-2. `flask-bootstrap`
-3. `flask-moment`
-4. `flask-wtf`
-5. `flask-sqlalchemy`
-6. `flask-migrate`
-7. `flask-mail`
+The virtualenv of this project is created for **python2.7** with following command:
+
+    # virtualenv -p /usr/bin/python2.7 venv    
 
 
 Start Server
@@ -36,5 +32,5 @@ Before Production
 TBD
 ===
 
-1. 数据库模型中的`state`的具体含义
-2. 
+See this [page](https://github.com/magodo/flask_demo/wiki/Requirement-Verification)
+

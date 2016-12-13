@@ -22,14 +22,12 @@
             <a class="navbar-brand" href="/">{{ system_name }}</a>
         </div>
         <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                {% if session.get('name') %}
-                <!-- TODO: change following view function name to blueprint relative after "auth" implemented these views -->
-                <li><a href={{ url_for("main.profile") }}>Profile</a></li>
-                <li><a href={{ url_for("main.logout") }}>Log out</a></li>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href={{ url_for("auth.logout") }}>Log Out</a></li>
                 {% else %}
-                <li><a href={{ url_for("main.login") }}>Login</a></li>
-                <li><a href={{ url_for("main.join") }}>Sign up</a></li>
+                <li><a href={{ url_for("auth.login") }}>Log In</a></li>
+                <li><a href={{ url_for("auth.join") }}>Sign up</a></li>
                 {% endif %}
             </ul>
         </div>
