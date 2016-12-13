@@ -22,7 +22,7 @@ def login():
         if not obj:
             flash('User "%s" not exists!'%name)
             return redirect(url_for(".login"))
-        elif obj.passwd != passwd:
+        elif not obj.verify_password(passwd):
             flash('"User Name" or "Password" incorrect!')
             return redirect(url_for(".login"))
         else:
@@ -45,7 +45,7 @@ def join():
         if obj is None:
             # create new row and store in db
             new_obj = InfoModel(phone=form.phone.data, mail=form.mail.data,
-                           passwd=form.passwd.data, state=True,
+                           password=form.passwd.data, state=True,
                            expire=datetime.today()+timedelta(days=365*10),
                            name=form.name.data, is_male=form.gender.data is 'M',
                            company=form.company.data,job=form.job.data,
