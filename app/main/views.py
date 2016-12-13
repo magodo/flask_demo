@@ -11,7 +11,7 @@ from ..email import async_send_email
 def index():
     return render_template("index.html")
 
-@main.route('/login/', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -35,7 +35,7 @@ def login():
     # 'GET'
     return render_template('login.html', form=form)
 
-@main.route('/join/', methods=['GET','POST'])
+@main.route('/join', methods=['GET','POST'])
 def join():
     form = JoinForm()
     if form.validate_on_submit():
@@ -65,7 +65,7 @@ def join():
     # 'GET'
     return render_template('join.html', form=form)
 
-@main.route('/logout/', methods=['GET'])
+@main.route('/logout', methods=['GET'])
 def logout():
     # change online state to false
     user = InfoModel.query.filter_by(name=session['name']).first()
@@ -76,7 +76,7 @@ def logout():
 
     return redirect(url_for('.index'))
 
-@main.route('/profile/', methods=['GET', 'POST'])
+@main.route('/profile', methods=['GET', 'POST'])
 def profile():
     form = ProfileForm()
     if form.validate_on_submit():

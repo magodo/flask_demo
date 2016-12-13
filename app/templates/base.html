@@ -24,11 +24,12 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {% if session.get('name') %}
-                <li><a href={{ url_for(".profile") }}>Profile</a></li>
-                <li><a href={{ url_for(".logout") }}>Log out</a></li>
+                <!-- TODO: change following view function name to blueprint relative after "auth" implemented these views -->
+                <li><a href={{ url_for("main.profile") }}>Profile</a></li>
+                <li><a href={{ url_for("main.logout") }}>Log out</a></li>
                 {% else %}
-                <li><a href={{ url_for(".login") }}>Login</a></li>
-                <li><a href={{ url_for(".join") }}>Sign up</a></li>
+                <li><a href={{ url_for("main.login") }}>Login</a></li>
+                <li><a href={{ url_for("main.join") }}>Sign up</a></li>
                 {% endif %}
             </ul>
         </div>
