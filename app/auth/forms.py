@@ -9,7 +9,48 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField,SelectField
-from wtforms.validators import Required, Length, Email, Optional
+from wtforms.validators import Required, Length, Email, Optional, Regexp, EqualTo, ValidationError
+
+from ..models import UserModel
+
+###################
+# custom validators
+###################
+
+class UniqBase(object):
+    '''Validator to ensure a field is not used in DB'''
+    def __init__(self, model):
+        self.model = model
+
+class UniqName(UniqBase):
+    '''User name uniqueness'''
+    def __init__(self, model, message=None):
+        super(UniqName, self).__init__(model)
+        if not message:
+            message = u'Username is already used!'
+        self.message = message
+
+    def __call__(self, form, field):
+        user = self.model.query.filter_by(name=field.data).first()
+        if user is not None:
+            raise ValidationError(self.message)
+
+class UniqEmail(UniqBase):
+    '''email uniqueness'''
+    def __init__(self, model, message=None):
+        super(UniqEmail, self).__init__(model)
+        if not message:
+            message = u'Email is already used!'
+        self.message = message
+
+    def __call__(self, form, field):
+        user = self.model.query.filter_by(email=field.data).first()
+        if user is not None:
+            raise ValidationError(self.message)
+
+###################
+# Forms
+###################
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[Required(), Length(1,64),
@@ -21,9 +62,14 @@ class LoginForm(FlaskForm):
 class JoinForm(FlaskForm):
 
     # mandatory
-    name = StringField("Name", validators=[Length(1,6,"Length should be <= 6")])
-    passwd = PasswordField("Passowrd", validators=[Required()])
-    email = StringField("E-mail", validators=[Required(), Email("Invalid E-mail address")])
+    email = StringField("E-mail", validators=[Required(), Length(1,64),
+                         Email("Invalid E-mail address"), UniqEmail(UserModel)])
+    name = StringField("Username", validators=[Required(), Length(1,6,
+                        "User name should be less than 6 characters"),
+                        Regexp('^[a-zA-Z][A-Za-z0-9_.]*$', 0, 'Username must have only letters, '
+                        'numbers, dots or underscores and starts with letters.'), UniqName(UserModel)])
+    password = PasswordField("Passowrd", validators=[Required(), EqualTo('password2', 'Passowrd must match!')])
+    password2 = PasswordField("Confirm password", validators=[Required()])
 
     # optional
     phone = StringField("Phone Number", validators = [Optional(), Length(11, 11, "Invalid phone number")])
@@ -37,3 +83,6 @@ class JoinForm(FlaskForm):
     #projs = SelectMultipleField("Project(s) involved", choices=[
     #    ('p1', 'Project 1'), ('p2', 'Project 2'), ('p3', 'Project 3')])
     submit = SubmitField("Submit")
+
+
+

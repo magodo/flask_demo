@@ -34,3 +34,10 @@ TBD
 
 See this [page](https://github.com/magodo/flask_demo/wiki/Requirement-Verification)
 
+TODO
+====
+
+1. Register form realtime validate. Check this [page](http://stackoverflow.com/questions/19898967/how-to-use-wtforms-in-ajax-validation)
+
+
+

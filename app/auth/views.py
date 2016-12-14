@@ -14,7 +14,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from .. import db
 from . import auth
 from ..email import async_send_email
-from ..models import InfoModel
+from ..models import UserModel
 from .forms import LoginForm, JoinForm
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -23,7 +23,7 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
-        obj = InfoModel.query.filter_by(email=email).first()
+        obj = UserModel.query.filter_by(email=email).first()
         if obj is not None and obj.verify_password(password):
             # add user to session
             login_user(obj, form.remember_me.data)
@@ -48,27 +48,24 @@ def logout():
 def join():
     form = JoinForm()
     if form.validate_on_submit():
+        # create new row and store in db
+        new_obj = UserModel(phone=form.phone.data, email=form.email.data,
+                       password=form.password.data, state=True,
+                       expire=datetime.today()+timedelta(days=365*10),
+                       name=form.name.data, is_male=form.gender.data is 'M',
+                       company=form.company.data,job=form.job.data,
+                       address=form.address.data, qq=form.qq.data)
+        db.session.add(new_obj)
+        db.session.commit()
+
+        # add user to session
+        login_user(new_obj, False)
+
+        # remind admin
         name = form.name.data
-        obj = InfoModel.query.filter_by(name=name).first()
-        if obj is None:
-            # create new row and store in db
-            new_obj = InfoModel(phone=form.phone.data, email=form.email.data,
-                           password=form.passwd.data, state=True,
-                           expire=datetime.today()+timedelta(days=365*10),
-                           name=form.name.data, is_male=form.gender.data is 'M',
-                           company=form.company.data,job=form.job.data,
-                           address=form.address.data, qq=form.qq.data)
-            db.session.add(new_obj)
-            db.session.commit()
+        async_send_email(current_app.config['DEMO_MAIL_ADMIN'], 'new user: %s'%name, 'mail/new_user', name=name)
 
-            # add user to session
-            login_user(new_obj, False)
+        return redirect(url_for('main.index'))
 
-            # remind admin
-            async_send_email(current_app.config['DEMO_MAIL_ADMIN'], 'new user: %s'%name, 'mail/new_user', name=name)
-
-            return redirect(url_for('main.index'))
-        else:
-            flash('Name: "%s" has been used!'%name)
     # 'GET'
     return render_template('join.html', form=form)

@@ -4,7 +4,7 @@ from flask import render_template, session, redirect, url_for, flash, current_ap
 from . import main
 from .. import db
 from .forms import LoginForm, JoinForm, ProfileForm
-from ..models import InfoModel
+from ..models import UserModel
 from ..email import async_send_email
 
 @main.route('/', methods=['GET'])
@@ -18,7 +18,7 @@ def login():
         # 'POST'
         name = form.name.data
         passwd = form.passwd.data
-        obj = InfoModel.query.filter_by(name=name).first()
+        obj = UserModel.query.filter_by(name=name).first()
         if not obj:
             flash('User "%s" not exists!'%name)
             return redirect(url_for(".login"))
@@ -41,10 +41,10 @@ def join():
     if form.validate_on_submit():
         # 'POST'
         name = form.name.data
-        obj = InfoModel.query.filter_by(name=name).first()
+        obj = UserModel.query.filter_by(name=name).first()
         if obj is None:
             # create new row and store in db
-            new_obj = InfoModel(phone=form.phone.data, email=form.email.data,
+            new_obj = UserModel(phone=form.phone.data, email=form.email.data,
                            password=form.passwd.data, state=True,
                            expire=datetime.today()+timedelta(days=365*10),
                            name=form.name.data, is_male=form.gender.data is 'M',
@@ -68,7 +68,7 @@ def join():
 @main.route('/logout', methods=['GET'])
 def logout():
     # change online state to false
-    user = InfoModel.query.filter_by(name=session['name']).first()
+    user = UserModel.query.filter_by(name=session['name']).first()
     user.state = False
     db.session.add(user)
     # pop 'user' from session
