@@ -19,5 +19,8 @@ def async_send_email(to, subject, template, **kwargs):
 def thr_send_email(app, msg):
     # although we have pushed app context, but it won't affect the thread, use app_context explicitly here
     with app.app_context():
-        mail.send(msg)
+        try:
+            mail.send(msg)
+        except TypeError as e:
+            print "[WARNING] send mail failed: email related environment variables are not set"
 

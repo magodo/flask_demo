@@ -19,7 +19,7 @@ login_manager.login_view = 'auth.login'
 def create_app(config_name):
     # create app and push app context so that we always have an app context("current_app" == "app")
     app = Flask(__name__)
-    app.app_context().push()
+    #app.app_context().push()
 
     # load config
     app.config.from_object(config[config_name])

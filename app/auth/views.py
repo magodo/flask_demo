@@ -59,6 +59,7 @@ def join():
                            company=form.company.data,job=form.job.data,
                            address=form.address.data, qq=form.qq.data)
             db.session.add(new_obj)
+            db.session.commit()
 
             # add user to session
             login_user(new_obj, False)
