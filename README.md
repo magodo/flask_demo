@@ -12,7 +12,7 @@ Start Server
 1. Start environment variables
 
     * `MAIL_USERNAM`: sender user name of mail(which is running SMTP server)
-    * `MAIL_PASSOWRD`: sender password of mail
+    * `MAIL_PASSWORD`: sender password of mail
     * `DEMO_MAIL_SENDER`: sender mail, with form: *Foo bar <foobar@example.com>*
     * `DEMO_MAIL_ADMIN`: admin's email address
     * `SECRET_KEY`: secret key

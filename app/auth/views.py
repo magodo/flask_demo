@@ -49,17 +49,23 @@ def join():
     form = JoinForm()
     if form.validate_on_submit():
         # create new row and store in db
-        new_obj = UserModel(phone=form.phone.data, email=form.email.data,
+        user = UserModel(phone=form.phone.data, email=form.email.data,
                        password=form.password.data, state=True,
                        expire=datetime.today()+timedelta(days=365*10),
                        name=form.name.data, is_male=form.gender.data is 'M',
                        company=form.company.data,job=form.job.data,
                        address=form.address.data, qq=form.qq.data)
-        db.session.add(new_obj)
+        db.session.add(user)
         db.session.commit()
 
         # add user to session
-        login_user(new_obj, False)
+        login_user(user, False)
+
+        # send confirmation email to user
+        token = user.generate_confirmation_token()
+        async_send_email(user.email, 'Confirm Your Account',
+                         'auth/email/confirm', user=user, token=token)
+        flash('A confirmation email has sent to you by email')
 
         # remind admin
         name = form.name.data
@@ -68,4 +74,40 @@ def join():
         return redirect(url_for('main.index'))
 
     # 'GET'
-    return render_template('join.html', form=form)
+    return render_template('auth/join.html', form=form)
+
+@auth.route('/confirm/<token>')
+@login_required
+def confirm(token):
+    if current_user.confirmed:
+        return redirect(url_for('main.index'))
+
+    if current_user.confirm(token):
+        flash('You have confirmed your account.')
+    else:
+        flash('The confirmation link is invalid or expired.')
+    return redirect(url_for('main.index'))
+
+@auth.route('/unconfirmed')
+def unconfirmed():
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('auth/unconfirmed.html')
+
+@auth.route('/confirm')
+@login_required
+def resend_confirmation():
+    token = current_user.generate_confirmation_token()
+    async_send_email(user.email, 'Confirm Your Account',
+                     'auth/email/confirm', user=user, token=token)
+    flash('A confirmation email has sent to you by email')
+    return redirect(url_for('main.index'))
+
+# protect un-confirmed user from accessing pages except "auth" views or "static"
+@auth.before_app_request # before_request only impact request within blueprint
+def before_request():
+    if current_user.is_authenticated \
+       and not current_user.confirmed \
+       and request.endpoint[:5] != 'auth.'\
+       and request.endpoint != 'static':
+        return redirect(url_for('auth.unconfirmed'))
