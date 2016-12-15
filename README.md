@@ -38,6 +38,7 @@ TODO
 ====
 
 1. Register form realtime validate. Check this [page](http://stackoverflow.com/questions/19898967/how-to-use-wtforms-in-ajax-validation)
+2. Confirmation by phone number rather than by email
 
 
 

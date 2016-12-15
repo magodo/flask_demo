@@ -82,7 +82,13 @@ class JoinForm(FlaskForm):
     # TODO: check how to specify HTML "row" attribute to the select field when rendering
     #projs = SelectMultipleField("Project(s) involved", choices=[
     #    ('p1', 'Project 1'), ('p2', 'Project 2'), ('p3', 'Project 3')])
-    submit = SubmitField("Submit")
+    submit = SubmitField("Join")
+
+class ChangePasswordForm(FlaskForm):
+    oldpassword = PasswordField("Old Passowrd", validators=[Required()])
+    password = PasswordField("New Passowrd", validators=[Required(), EqualTo('password2', 'Passowrd must match!')])
+    password2 = PasswordField("Confirm New Password", validators=[Required()])
+    submit = SubmitField("Update Passowrd")
 
 
 

@@ -15,7 +15,7 @@ from .. import db
 from . import auth
 from ..email import async_send_email
 from ..models import UserModel
-from .forms import LoginForm, JoinForm
+from .forms import LoginForm, JoinForm, ChangePasswordForm
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -102,6 +102,21 @@ def resend_confirmation():
                      'auth/email/confirm', user=user, token=token)
     flash('A confirmation email has sent to you by email')
     return redirect(url_for('main.index'))
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.oldpassword.data):
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            flash('Your password has been updated successfully!')
+            return redirect(url_for('main.index'))
+        else:
+            flash("Invalid password.")
+    return render_template('auth/change_password.html', form=form)
+
 
 # protect un-confirmed user from accessing pages except "auth" views or "static"
 @auth.before_app_request # before_request only impact request within blueprint
