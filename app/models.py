@@ -63,6 +63,24 @@ class UserModel(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    # reset password
+    def generate_reset_token(self, expiration=3600): # expiration unit is second
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'reset': self.id})
+
+    @staticmethod
+    def reset_password(token, new_password):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        uid = data.get('reset')
+        user = UserModel.query.filter_by(id=uid).first()
+        user.password = new_password
+        db.session.add(user)
+        return True
+
 @login_manager.user_loader
 def load_user(user_id):
     return UserModel.query.get(int(user_id))

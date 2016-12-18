@@ -48,6 +48,19 @@ class UniqEmail(UniqBase):
         if user is not None:
             raise ValidationError(self.message)
 
+class ExistEmail(UniqBase):
+    '''email existance'''
+    def __init__(self, model, message=None):
+        super(ExistEmail, self).__init__(model)
+        if not message:
+            message = u'Email not exist!'
+        self.message = message
+
+    def __call__(self, form, field):
+        user = self.model.query.filter_by(email=field.data).first()
+        if user is None:
+            raise ValidationError(self.message)
+
 ###################
 # Forms
 ###################
@@ -90,5 +103,13 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField("Confirm New Password", validators=[Required()])
     submit = SubmitField("Update Passowrd")
 
+class PasswordResetRequestForm(FlaskForm):
+    email = StringField('Email', validators=[Required(), Length(1,64),
+                                             Email(), ExistEmail(UserModel)])
+    submit = SubmitField("Reset Password")
 
+class PasswordResetForm(FlaskForm):
+    password = PasswordField("Passowrd", validators=[Required(), EqualTo("password2", "Password must match!")])
+    password2 = PasswordField("Confirm password", validators=[Required()])
+    submit = SubmitField("Reset Password")
 
