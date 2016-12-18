@@ -163,8 +163,9 @@ def change_email_request():
     form = ChangeEmailForm()
     if form.validate_on_submit():
         if current_user.verify_password(form.password.data):
-            token = current_user.generate_email_change_token(form.email.data)
-            async_send_email(current_user.email, 'Change Email Address',
+            new_email = form.email.data
+            token = current_user.generate_email_change_token(new_email)
+            async_send_email(new_email, 'Change Email Address',
                              'auth/email/change_email', user=current_user,
                              token=token)
             flash('An emmail with instruction to change email address has been sent to you.')
