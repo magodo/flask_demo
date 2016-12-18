@@ -81,6 +81,24 @@ class UserModel(UserMixin, db.Model):
         db.session.add(user)
         return True
 
+    # change email address
+    def generate_email_change_token(self, new_email, expiration=3600): # expiration unit is second
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'change_email': self.id, 'email': new_email})
+
+    def change_email(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('change_email') != self.id:
+            return False
+        self.email = data.get('email')
+        db.session.add(self)
+        return True
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return UserModel.query.get(int(user_id))

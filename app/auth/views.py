@@ -15,7 +15,8 @@ from .. import db
 from . import auth
 from ..email import async_send_email
 from ..models import UserModel
-from .forms import LoginForm, JoinForm, ChangePasswordForm, PasswordResetForm, PasswordResetRequestForm
+from .forms import LoginForm, JoinForm, ChangePasswordForm, PasswordResetForm, \
+                   PasswordResetRequestForm, ChangeEmailForm
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -155,6 +156,32 @@ def password_reset(token):
         else:
             return redirect(url_for('main.index'))
     return render_template('auth/reset_password.html', form=form)
+
+@auth.route('/change-email', methods=['GET', 'POST'])
+@login_required
+def change_email_request():
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            token = current_user.generate_email_change_token(form.email.data)
+            async_send_email(current_user.email, 'Change Email Address',
+                             'auth/email/change_email', user=current_user,
+                             token=token)
+            flash('An emmail with instruction to change email address has been sent to you.')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Invalid password!')
+    return render_template('auth/change_email.html', form=form)
+
+@auth.route('/change-email/<token>')
+@login_required
+def change_email(token):
+    if current_user.change_email(token):
+        flash("Your E-mail address has been changed")
+    else:
+        flash("Invalid request")
+    return redirect(url_for("main.index"))
+
 
 
 
