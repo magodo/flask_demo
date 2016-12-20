@@ -9,7 +9,7 @@
 
 import os
 from app import create_app, db
-from app.models import UserModel
+from app.models import UserModel, RoleModel
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -18,7 +18,7 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 def cb_make_context():
-    return dict(app=app, db=db, UserModel=UserModel)
+    return dict(app=app, db=db, UserModel=UserModel, RoleModel=RoleModel)
 manager.add_command("shell", Shell(make_context=cb_make_context))
 manager.add_command('db', MigrateCommand)
 
