@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -59,31 +60,26 @@ class UserModel(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    phone = db.Column(db.String, unique=False, index=False, default=None)
     email = db.Column(db.String, unique=False, index=False, default=None)
+    name = db.Column(db.String, unique=True, index=False)
 
     # set via "password" property
     password_hash = db.Column(db.String, unique=False, index=False, default="")
 
-    state = db.Column(db.Boolean, unique=False, index=False, default=False) # TODO: clarify the meaning of this column(offline/online?)
-    expire = db.Column(db.DateTime, unique=False, index=False, default=None)
-    name = db.Column(db.String, unique=True, index=False)
-    is_male = db.Column(db.Boolean, unique=False, index=False, default=True)
-    birthday = db.Column(db.Date, unique=False, index=False, default=None)
-    company = db.Column(db.String, unique=False, index=False, default=None)
-    job = db.Column(db.String, unique=False, index=False, default=None)
-    address = db.Column(db.String, unique=False, index=False, default=None)
-    qq = db.Column(db.String, unique=False, index=False, default=None)
-    #proj_count = db.Column(db.Integer, unique=False, index=False, default=None)
-
-    confirmed = db.Column(db.Boolean, default=False) # whether registering user is confirmed
+    # whether registering user is confirmed
+    confirmed = db.Column(db.Boolean, default=False)
 
     # point to "id" column for model whoes __tablename__ is "roles"
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text())
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+
     def __init__(self, **kwargs):
         super(UserModel, self).__init__(**kwargs)
-        if self.email == current_app.config['DEMO_ADMIN']:
+        if self.email == current_app.config['DEMO_MAIL_ADMIN']:
             self.role = RoleModel.query.filter_by(permissions=Permission.ADMINISTER).first()
         else:
             self.role = RoleModel.query.filter_by(default=True).first()
@@ -163,6 +159,11 @@ class UserModel(UserMixin, db.Model):
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
 
+    # update last seen time
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+
 #################################################
 
 # Overload anonymous_user
@@ -174,7 +175,7 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
-login_manager.anonymous_user = AnonymouseUser
+login_manager.anonymous_user = AnonymousUser
 #################################################
 
 

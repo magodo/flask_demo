@@ -83,18 +83,6 @@ class JoinForm(FlaskForm):
                         'numbers, dots or underscores and starts with letters.'), UniqName(UserModel)])
     password = PasswordField("Passowrd", validators=[Required(), EqualTo('password2', 'Passowrd must match!')])
     password2 = PasswordField("Confirm password", validators=[Required()])
-
-    # optional
-    phone = StringField("Phone Number", validators = [Optional(), Length(11, 11, "Invalid phone number")])
-    gender = SelectField("Gender", choices=[('M', 'Male'), ('F', 'Female')])
-    ##birthday = #TODO
-    company = StringField("Company")
-    job = SelectField("Job", choices=[('dev', 'Developer'), ('op', 'Operator')])
-    address = StringField("Address")
-    qq = StringField("QQ number")
-    # TODO: check how to specify HTML "row" attribute to the select field when rendering
-    #projs = SelectMultipleField("Project(s) involved", choices=[
-    #    ('p1', 'Project 1'), ('p2', 'Project 2'), ('p3', 'Project 3')])
     submit = SubmitField("Join")
 
 class ChangePasswordForm(FlaskForm):

@@ -18,6 +18,10 @@ from ..models import UserModel
 from .forms import LoginForm, JoinForm, ChangePasswordForm, PasswordResetForm, \
                    PasswordResetRequestForm, ChangeEmailForm
 
+#####################################
+# Login && Logout
+#####################################
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -26,7 +30,6 @@ def login():
         password = form.password.data
         obj = UserModel.query.filter_by(email=email).first()
         if obj is not None and obj.verify_password(password):
-            # add user to session
             login_user(obj, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('main.index'))
         else:
@@ -36,30 +39,26 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
-    # change online state to false
-    current_user.state = False
-    db.session.add(current_user)
-
-    # pop user from session
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
+
+#####################################
+# Join && Confirmation
+#####################################
 
 @auth.route('/join', methods=['GET','POST'])
 def join():
     form = JoinForm()
     if form.validate_on_submit():
         # create new row and store in db
-        user = UserModel(phone=form.phone.data, email=form.email.data,
-                       password=form.password.data, state=True,
-                       expire=datetime.today()+timedelta(days=365*10),
-                       name=form.name.data, is_male=form.gender.data is 'M',
-                       company=form.company.data,job=form.job.data,
-                       address=form.address.data, qq=form.qq.data)
+        user = UserModel(email=form.email.data,
+                         password=form.password.data,
+                         name=form.name.data)
         db.session.add(user)
         db.session.commit()
 
-        # add user to session
+        # login user
         login_user(user, False)
 
         # send confirmation email to user
@@ -104,6 +103,21 @@ def resend_confirmation():
     flash('A confirmation email has sent to you by email')
     return redirect(url_for('main.index'))
 
+# protect un-confirmed user from accessing pages except "auth" views or "static"
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed \
+                and request.endpoint[:5] != 'auth.':
+            return redirect(url_for('auth.unconfirmed'))
+
+#####################################
+# Change password
+#####################################
+
+# change password after login
+
 @auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
@@ -118,15 +132,7 @@ def change_password():
             flash("Invalid password.")
     return render_template('auth/change_password.html', form=form)
 
-
-# protect un-confirmed user from accessing pages except "auth" views or "static"
-@auth.before_app_request # before_request only impact request within blueprint
-def before_request():
-    if current_user.is_authenticated \
-       and not current_user.confirmed \
-       and request.endpoint[:5] != 'auth.'\
-       and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+# reset password when forget
 
 @auth.route('/reset', methods=['GET','POST'])
 def password_reset_request():
@@ -157,6 +163,10 @@ def password_reset(token):
             return redirect(url_for('main.index'))
     return render_template('auth/reset_password.html', form=form)
 
+#####################################
+# Change Email
+#####################################
+
 @auth.route('/change-email', methods=['GET', 'POST'])
 @login_required
 def change_email_request():
@@ -182,7 +192,3 @@ def change_email(token):
     else:
         flash("Invalid request")
     return redirect(url_for("main.index"))
-
-
-
-
