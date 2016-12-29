@@ -1,5 +1,6 @@
+import hashlib
 from datetime import datetime
-from flask import current_app
+from flask import current_app, request
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
@@ -72,6 +73,9 @@ class UserModel(UserMixin, db.Model):
     # point to "id" column for model whoes __tablename__ is "roles"
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
+    # avatar hash
+    avatar_hash = db.Column(db.String(32))
+
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -79,10 +83,14 @@ class UserModel(UserMixin, db.Model):
 
     def __init__(self, **kwargs):
         super(UserModel, self).__init__(**kwargs)
+        # set role for user or admin
         if self.email == current_app.config['DEMO_MAIL_ADMIN']:
             self.role = RoleModel.query.filter_by(permissions=Permission.ADMINISTER).first()
         else:
             self.role = RoleModel.query.filter_by(default=True).first()
+        # set avatar_hash
+        if self.email is not None and self.avatar_hash is None:
+            self.avatar_hash = self.generate_email_hash(self.email)
 
     def __repr__(self):
         return "<%s %r>"%(self.__class__, self.name)
@@ -148,6 +156,7 @@ class UserModel(UserMixin, db.Model):
         if data.get('change_email') != self.id:
             return False
         self.email = data.get('email')
+        self.avatar_hash = self.generate_email_hash(self.email)
         db.session.add(self)
         return True
 
@@ -163,6 +172,20 @@ class UserModel(UserMixin, db.Model):
     def ping(self):
         self.last_seen = datetime.utcnow()
         db.session.add(self)
+
+    # avatar icon based on gravatar
+    @staticmethod
+    def generate_email_hash(email):
+        return hashlib.md5(email.lower().encode('utf-8')).hexdigest()
+
+    def gravatar(self, size=100, default='identicon', rating='pg'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        hash = self.avatar_hash or self.generate_email_hash(self.email)
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+                url=url, hash=hash, size=size, default=default, rating=rating)
 
 #################################################
 

@@ -3,39 +3,41 @@
 {% block title %}Demo - {{ user.name }}{% endblock %}
 {% block page_content %}
 <div class="page-header">
+    <img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}">
+    <div class="profile-header">
+        <h1>{{ user.name }}</h1>
 
-    <h1>{{ user.name }}</h1>
-
-    {% if user.location %}
-    <p>
-        From <a href="http://maps.baidu.com/?q={{ user.location }}">
-            {{ user.location }}
-        </a>
-    </p>
-    {% endif %}
-
-    {% if current_user.is_administrator() %}
-        <p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
-    {% endif %}
-
-    {% if user.about_me %}
+        {% if user.location %}
         <p>
-            {{ user.about_me }}
+            From <a href="http://maps.baidu.com/?q={{ user.location }}">
+                {{ user.location }}
+            </a>
         </p>
-    {% endif %}
+        {% endif %}
 
-    <p>
-        Member since {{ moment(user.member_since).format('L') }}.
-        Last seen {{ moment(user.last_seen).fromNow() }}.
-    </p>
-     <p>
-         {% if user == current_user %}
-             <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">Edit Profile</a>
-         {% endif %}
+        {% if current_user.is_administrator() %}
+            <p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+        {% endif %}
 
-         {% if current_user.is_administrator() %}
-             <a class="btn btn-danger" href="{{ url_for('.edit_profile_admin', id=user.id) }}">Edit Profile [Admin]</a>
-         {% endif %}
-     </p>
+        {% if user.about_me %}
+            <p>
+                {{ user.about_me }}
+            </p>
+        {% endif %}
+
+        <p>
+            Member since {{ moment(user.member_since).format('L') }}.
+            Last seen {{ moment(user.last_seen).fromNow() }}.
+        </p>
+         <p>
+             {% if user == current_user %}
+                 <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">Edit Profile</a>
+             {% endif %}
+
+             {% if current_user.is_administrator() %}
+                 <a class="btn btn-danger" href="{{ url_for('.edit_profile_admin', id=user.id) }}">Edit Profile [Admin]</a>
+             {% endif %}
+         </p>
+     </div>
 </div>
 {% endblock %}
